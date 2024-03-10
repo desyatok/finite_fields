@@ -1,0 +1,6 @@
+#ifndef FINITE_FIELDS_LIBRARY_H
+#define FINITE_FIELDS_LIBRARY_H
+
+void hello(void);
+
+#endif //FINITE_FIELDS_LIBRARY_H
