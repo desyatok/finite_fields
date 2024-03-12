@@ -2,23 +2,22 @@
 #define FINITE_FIELDS_LIBRARY_H
 
 #include <inttypes.h>
-#include <stdlib.h>
 
 typedef struct
 {
-    size_t mod;
-    size_t poly_dim;
-    uint8_t *poly;
+    uint8_t mod;
+    uint8_t poly_deg;
+    uint8_t *irred_poly;
 } Field;
 
 typedef struct
 {
     Field *field;
-    size_t dim;
-    uint8_t *member;
+    uint8_t deg;
+    uint8_t *poly;
 } FieldMember;
 
-Field *getField(size_t mod, const uint8_t *poly, size_t poly_dim);
+Field *getField(uint8_t mod, const uint8_t *poly, uint8_t poly_deg);
 
 FieldMember *getZero(Field *field);
 
