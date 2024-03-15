@@ -17,11 +17,12 @@ Field *getField(uint8_t mod, const uint8_t *poly, uint8_t poly_deg)
 
 FieldMember *getZero(Field *field)
 {
+    if (field == NULL) return NULL;
     FieldMember *zero = (FieldMember *)malloc(sizeof(FieldMember));
     zero->field = field;
-    zero->deg = field->poly_deg;
-    zero->poly = (uint8_t *)malloc((zero->deg + 1) * sizeof(uint8_t));
-    for (uint8_t i = 0; i <= zero->deg; ++i)
+    zero->deg = 0;
+    zero->poly = (uint8_t *)malloc((field->poly_deg + 1) * sizeof(uint8_t));
+    for (uint8_t i = 0; i <= field->poly_deg; ++i)
     {
         zero->poly[i] = 0;
     }
@@ -30,14 +31,15 @@ FieldMember *getZero(Field *field)
 
 FieldMember *getIdentity(Field *field)
 {
+    if (field == NULL) return NULL;
     FieldMember *identity = (FieldMember *)malloc(sizeof(FieldMember));
     identity->field = field;
-    identity->deg = field->poly_deg;
-    identity->poly = (uint8_t *)malloc((identity->deg + 1) * sizeof(uint8_t));
-    for (uint8_t i = 0; i < identity->deg; ++i)
+    identity->deg = 0;
+    identity->poly = (uint8_t *)malloc((field->poly_deg + 1) * sizeof(uint8_t));
+    for (uint8_t i = 1; i <= field->poly_deg; ++i)
     {
         identity->poly[i] = 0;
     }
-    identity->poly[identity->deg] = 1;
+    identity->poly[0] = 1;
     return identity;
 }
