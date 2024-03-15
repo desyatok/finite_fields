@@ -47,4 +47,8 @@ uint16_t ff_to_uint16(const FieldMember *elem);
 
 uint32_t ff_to_uint32(const FieldMember *elem);
 
+void freeField(Field *field);
+
+void freeFieldMember(FieldMember *mem, _Bool delete_field);
+
 #endif //FINITE_FIELDS_LIBRARY_H
