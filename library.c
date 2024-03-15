@@ -15,13 +15,32 @@ Field *getField(uint8_t mod, const uint8_t *poly, uint8_t poly_deg)
     return newField;
 }
 
+void freeField(Field *field)
+{
+    if (field == NULL) return;
+    free(field->irred_poly);
+    free(field);
+}
+
+void freeFieldMember(FieldMember *mem, _Bool delete_field)
+{
+    if (mem == NULL) return;
+    if (delete_field)
+    {
+        freeField(mem->field);
+    }
+    free(mem->poly);
+    free(mem);
+}
+
 FieldMember *getZero(Field *field)
 {
+    if (field == NULL) return NULL;
     FieldMember *zero = (FieldMember *)malloc(sizeof(FieldMember));
     zero->field = field;
-    zero->deg = field->poly_deg;
-    zero->poly = (uint8_t *)malloc((zero->deg + 1) * sizeof(uint8_t));
-    for (uint8_t i = 0; i <= zero->deg; ++i)
+    zero->deg = 0;
+    zero->poly = (uint8_t *)malloc((field->poly_deg + 1) * sizeof(uint8_t));
+    for (uint8_t i = 0; i <= field->poly_deg; ++i)
     {
         zero->poly[i] = 0;
     }
@@ -30,14 +49,91 @@ FieldMember *getZero(Field *field)
 
 FieldMember *getIdentity(Field *field)
 {
+    if (field == NULL) return NULL;
     FieldMember *identity = (FieldMember *)malloc(sizeof(FieldMember));
     identity->field = field;
-    identity->deg = field->poly_deg;
-    identity->poly = (uint8_t *)malloc((identity->deg + 1) * sizeof(uint8_t));
-    for (uint8_t i = 0; i < identity->deg; ++i)
+    identity->deg = 0;
+    identity->poly = (uint8_t *)malloc((field->poly_deg + 1) * sizeof(uint8_t));
+    for (uint8_t i = 1; i <= field->poly_deg; ++i)
     {
         identity->poly[i] = 0;
     }
-    identity->poly[identity->deg] = 1;
+    identity->poly[0] = 1;
     return identity;
+}
+
+uint8_t ff_to_uint8(const FieldMember *elem)
+{
+    if (elem == NULL || elem->field->mod != 2 || elem->field->poly_deg != 8) return 0;
+    uint8_t num = 0;
+    for (uint8_t i = 0; i < elem->field->poly_deg; ++i)
+    {
+        num |= elem->poly[i] << i;
+    }
+    return num;
+}
+
+uint16_t ff_to_uint16(const FieldMember *elem)
+{
+    if (elem == NULL || elem->field->mod != 2 || elem->field->poly_deg != 16) return 0;
+    uint16_t num = 0;
+    for (uint8_t i = 0; i < elem->field->poly_deg; ++i)
+    {
+        num |= elem->poly[i] << i;
+    }
+    return num;
+}
+
+uint32_t ff_to_uint32(const FieldMember *elem)
+{
+    if (elem == NULL || elem->field->mod != 2 || elem->field->poly_deg != 32) return 0;
+    uint32_t num = 0;
+    for (uint8_t i = 0; i < elem->field->poly_deg; ++i)
+    {
+        num |= elem->poly[i] << i;
+    }
+    return num;
+}
+
+FieldMember *uint8_to_ff(uint8_t elem)
+{
+    uint8_t poly[] = {1,0,1,1,1,0,0,0,1};
+    Field *field = getField(2,poly,8);
+    FieldMember *mem = getZero(field);
+    for (uint8_t i = 0; i < mem->field->poly_deg; ++i)
+    {
+        mem->poly[i] = elem % 2;
+        elem /= 2;
+    }
+    return mem;
+}
+
+FieldMember *uint16_to_ff(uint16_t elem)
+{
+    uint8_t poly[] = {1,1,0,1,0,0,0,0,
+                       0,0,0,0,1,0,0,0, 1};
+    Field *field = getField(2,poly,16);
+    FieldMember *mem = getZero(field);
+    for (uint8_t i = 0; i < mem->field->poly_deg; ++i)
+    {
+        mem->poly[i] = elem % 2;
+        elem /= 2;
+    }
+    return mem;
+}
+
+FieldMember *uint32_to_ff(uint32_t elem)
+{
+    uint8_t poly[] = {1,1,1,0,0,0,0,0,
+                      0,0,0,0,0,0,0,0,
+                      0,0,0,0,0,0,1,0,
+                      0,0,0,0,0,0,0,0,1};
+    Field *field = getField(2,poly,32);
+    FieldMember *mem = getZero(field);
+    for (uint8_t i = 0; i < mem->field->poly_deg; ++i)
+    {
+        mem->poly[i] = elem % 2;
+        elem /= 2;
+    }
+    return mem;
 }
