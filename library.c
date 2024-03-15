@@ -94,3 +94,46 @@ uint32_t ff_to_uint32(const FieldMember *elem)
     }
     return num;
 }
+
+FieldMember *uint8_to_ff(uint8_t elem)
+{
+    uint8_t poly[] = {1,0,1,1,1,0,0,0,1};
+    Field *field = getField(2,poly,8);
+    FieldMember *mem = getZero(field);
+    for (uint8_t i = 0; i < mem->field->poly_deg; ++i)
+    {
+        mem->poly[i] = elem % 2;
+        elem /= 2;
+    }
+    return mem;
+}
+
+FieldMember *uint16_to_ff(uint16_t elem)
+{
+    uint8_t poly[] = {1,1,0,1,0,0,0,0,
+                       0,0,0,0,1,0,0,0, 1};
+    Field *field = getField(2,poly,16);
+    FieldMember *mem = getZero(field);
+    for (uint8_t i = 0; i < mem->field->poly_deg; ++i)
+    {
+        mem->poly[i] = elem % 2;
+        elem /= 2;
+    }
+    return mem;
+}
+
+FieldMember *uint32_to_ff(uint32_t elem)
+{
+    uint8_t poly[] = {1,1,1,0,0,0,0,0,
+                      0,0,0,0,0,0,0,0,
+                      0,0,0,0,0,0,1,0,
+                      0,0,0,0,0,0,0,0,1};
+    Field *field = getField(2,poly,32);
+    FieldMember *mem = getZero(field);
+    for (uint8_t i = 0; i < mem->field->poly_deg; ++i)
+    {
+        mem->poly[i] = elem % 2;
+        elem /= 2;
+    }
+    return mem;
+}

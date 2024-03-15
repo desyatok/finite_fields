@@ -30,19 +30,9 @@ MU_TEST(test_ff_to_uint8)
 
 MU_TEST(test_ff_to_uint16)
 {
-    const size_t DIM = 17;
-    uint8_t *poly = malloc( DIM * sizeof(uint8_t));
-    for (int i = 0; i < DIM; ++i)
-    {
-        poly[i] = 0;
-    }
-    poly[16] = 1;
-    poly[12] = 1;
-    poly[3] = 1;
-    poly[1] = 1;
-    poly[0] = 1;
-    field = getField(2, poly,DIM - 1);
-
+    uint8_t poly[] = {1,1,0,1,0,0,0,0,
+                      0,0,0,0,1,0,0,0, 1};
+    field = getField(2,poly,16);
     mem = getZero(field);
     mem->poly[0] = 1;
     mem->poly[1] = 1;
@@ -55,23 +45,15 @@ MU_TEST(test_ff_to_uint16)
     mem->poly[12] = 1;
     mu_check(ff_to_uint16(mem) == 5563);
     freeFieldMember(mem, 1);
-    free(poly);
 }
-//10111110101111001010011110
+
 MU_TEST(test_ff_to_uint32)
 {
-    const size_t DIM = 33;
-    uint8_t *poly = malloc( DIM * sizeof(uint8_t));
-    for (int i = 0; i < DIM; ++i)
-    {
-        poly[i] = 0;
-    }
-    poly[32] = 1;
-    poly[22] = 1;
-    poly[2] = 1;
-    poly[1] = 1;
-    poly[0] = 1;
-    field = getField(2, poly,DIM - 1);
+    uint8_t poly[] = {1,1,1,0,0,0,0,0,
+                      0,0,0,0,0,0,0,0,
+                      0,0,0,0,0,0,1,0,
+                      0,0,0,0,0,0,0,0,1};
+    field = getField(2,poly,32);
     mem = getZero(field);
     mem->poly[1] = 1;
     mem->poly[2] = 1;
@@ -92,7 +74,31 @@ MU_TEST(test_ff_to_uint32)
     mem->poly[25] = 1;
     mu_check(ff_to_uint32(mem) == 50000542);
     freeFieldMember(mem, 1);
-    free(poly);
+}
+
+MU_TEST(test_uint8_to_ff)
+{
+    uint8_t elem = 123;
+    mem = uint8_to_ff(elem);
+    mu_check(ff_to_uint8(mem) == elem);
+    freeFieldMember(mem, 1);
+}
+
+MU_TEST(test_uint16_to_ff)
+{
+    uint16_t elem = 4325;
+    mem = uint16_to_ff(elem);
+    mu_check(ff_to_uint16(mem) == elem);
+    freeFieldMember(mem, 1);
+}
+
+
+MU_TEST(test_uint32_to_ff)
+{
+    uint32_t elem = 5345346;
+    mem = uint32_to_ff(elem);
+    mu_check(ff_to_uint32(mem) == elem);
+    freeFieldMember(mem, 1);
 }
 
 MU_TEST_SUITE(test_suite)
@@ -102,6 +108,10 @@ MU_TEST_SUITE(test_suite)
     MU_RUN_TEST(test_ff_to_uint8);
     MU_RUN_TEST(test_ff_to_uint16);
     MU_RUN_TEST(test_ff_to_uint32);
+
+    MU_RUN_TEST(test_uint8_to_ff);
+    MU_RUN_TEST(test_uint16_to_ff);
+    MU_RUN_TEST(test_uint32_to_ff);
 }
 
 int main()
