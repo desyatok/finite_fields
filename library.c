@@ -137,3 +137,34 @@ FieldMember *uint32_to_ff(uint32_t elem)
     }
     return mem;
 }
+
+FieldMember *fieldMemberInit(Field *field, const uint8_t *poly, uint8_t poly_deg)
+{
+    if (field == NULL || poly == NULL || field->poly_deg <= poly_deg) return NULL;
+    FieldMember *member = getZero(field);
+    for (uint8_t i = 0; i <= field->poly_deg; ++i)
+    {
+        member->poly[i] = i <= poly_deg ? poly[i] % field->mod : 0;
+    }
+    return member;
+}
+
+_Bool fieldsAreEqual(const Field *left, const Field *right)
+{
+    if (left == NULL || right == NULL || left->mod != right->mod || left->poly_deg != right->poly_deg) return 0;
+    for (uint8_t i = 0; i <= left->poly_deg; ++i)
+    {
+        if (left->irred_poly[i] != right->irred_poly[i]) return 0;
+    }
+    return 1;
+}
+
+_Bool fieldMembersAreEqual(const FieldMember *left, const FieldMember *right)
+{
+    if (left == NULL || right == NULL || !fieldsAreEqual(left->field, right->field)) return 0;
+    for (uint8_t i = 0; i <= left->field->poly_deg; ++i)
+    {
+        if (left->poly[i] != right->poly[i]) return 0;
+    }
+    return 1;
+}

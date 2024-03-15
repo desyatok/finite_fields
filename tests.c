@@ -92,13 +92,29 @@ MU_TEST(test_uint16_to_ff)
     freeFieldMember(mem, 1);
 }
 
-
 MU_TEST(test_uint32_to_ff)
 {
     uint32_t elem = 5345346;
     mem = uint32_to_ff(elem);
     mu_check(ff_to_uint32(mem) == elem);
     freeFieldMember(mem, 1);
+}
+
+MU_TEST(test_fieldMemberInit)
+{
+    uint8_t irred_poly[] = {1,1,0,0,1};
+    field = getField(3,irred_poly,4);
+    uint8_t poly[] = {1,3,2,12};
+    uint8_t poly_deg = 3;
+    FieldMember *test_mem = fieldMemberInit(field,poly,poly_deg);
+    mem = getZero(field);
+    for (uint8_t i = 0; i <= field->poly_deg; ++i)
+    {
+        mem->poly[i] = mem->poly[i] = i <= poly_deg ? poly[i] % field->mod : 0;
+    }
+    mu_check(fieldMembersAreEqual(test_mem,mem));
+    freeFieldMember(test_mem,0);
+    freeFieldMember(mem,1);
 }
 
 MU_TEST_SUITE(test_suite)
@@ -112,6 +128,8 @@ MU_TEST_SUITE(test_suite)
     MU_RUN_TEST(test_uint8_to_ff);
     MU_RUN_TEST(test_uint16_to_ff);
     MU_RUN_TEST(test_uint32_to_ff);
+
+    MU_RUN_TEST(test_fieldMemberInit);
 }
 
 int main()
