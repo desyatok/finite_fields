@@ -38,7 +38,7 @@ FieldMember *getZero(Field *field)
     if (field == NULL) return NULL;
     FieldMember *zero = (FieldMember *)malloc(sizeof(FieldMember));
     zero->field = field;
-    zero->deg = 0;
+    zero->deg = UINT8_MAX;
     zero->poly = (uint8_t *)malloc((field->poly_deg + 1) * sizeof(uint8_t));
     for (uint8_t i = 0; i <= field->poly_deg; ++i)
     {
@@ -104,6 +104,7 @@ FieldMember *uint8_to_ff(uint8_t elem)
     {
         mem->poly[i] = elem % 2;
         elem /= 2;
+        if (mem->poly[i] != 0) mem->deg = i;
     }
     return mem;
 }
@@ -118,6 +119,7 @@ FieldMember *uint16_to_ff(uint16_t elem)
     {
         mem->poly[i] = elem % 2;
         elem /= 2;
+        if (mem->poly[i] != 0) mem->deg = i;
     }
     return mem;
 }
@@ -134,6 +136,7 @@ FieldMember *uint32_to_ff(uint32_t elem)
     {
         mem->poly[i] = elem % 2;
         elem /= 2;
+        if (mem->poly[i] != 0) mem->deg = i;
     }
     return mem;
 }
@@ -145,6 +148,7 @@ FieldMember *fieldMemberInit(Field *field, const uint8_t *poly, uint8_t poly_deg
     for (uint8_t i = 0; i <= field->poly_deg; ++i)
     {
         member->poly[i] = i <= poly_deg ? poly[i] % field->mod : 0;
+        if (member->poly[i] != 0) member->deg = i;
     }
     return member;
 }
@@ -161,7 +165,9 @@ _Bool fieldsAreEqual(const Field *left, const Field *right)
 
 _Bool fieldMembersAreEqual(const FieldMember *left, const FieldMember *right)
 {
-    if (left == NULL || right == NULL || !fieldsAreEqual(left->field, right->field)) return 0;
+    if (left == NULL || right == NULL
+        || !fieldsAreEqual(left->field, right->field)
+        || left->deg != right->deg) return 0;
     for (uint8_t i = 0; i <= left->field->poly_deg; ++i)
     {
         if (left->poly[i] != right->poly[i]) return 0;
@@ -176,6 +182,7 @@ FieldMember *ffAdd(const FieldMember *left, const FieldMember *right)
     for (uint8_t i = 0; i < left->field->poly_deg; ++i)
     {
         result->poly[i] = (left->poly[i] + right->poly[i]) % left->field->mod;
+        if (result->poly[i] != 0) result->deg = i;
     }
     return result;
 }
@@ -187,6 +194,7 @@ FieldMember *ffNeg(const FieldMember *elem)
     for (uint8_t i = 0; i < elem->field->poly_deg; ++i)
     {
         result->poly[i] = (elem->field->mod - elem->poly[i]) % elem->field->mod;
+        if (result->poly[i] != 0) result->deg = i;
     }
     return result;
 }

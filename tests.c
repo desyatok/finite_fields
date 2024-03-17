@@ -111,6 +111,7 @@ MU_TEST(test_fieldMemberInit)
     for (uint8_t i = 0; i <= field->poly_deg; ++i)
     {
         mem->poly[i] = mem->poly[i] = i <= poly_deg ? poly[i] % field->mod : 0;
+        if (mem->poly[i] != 0) mem->deg = i;
     }
     mu_check(fieldMembersAreEqual(test_mem,mem));
     freeFieldMember(test_mem,0);
