@@ -168,3 +168,33 @@ _Bool fieldMembersAreEqual(const FieldMember *left, const FieldMember *right)
     }
     return 1;
 }
+
+FieldMember *ffAdd(const FieldMember *left, const FieldMember *right)
+{
+    if (left == NULL || right == NULL || !fieldsAreEqual(left->field, right->field)) return NULL;
+    FieldMember *result = getZero(left->field);
+    for (uint8_t i = 0; i < left->field->poly_deg; ++i)
+    {
+        result->poly[i] = (left->poly[i] + right->poly[i]) % left->field->mod;
+    }
+    return result;
+}
+
+FieldMember *ffNeg(const FieldMember *elem)
+{
+    if (elem == NULL || elem->field == NULL) return NULL;
+    FieldMember *result = getZero(elem->field);
+    for (uint8_t i = 0; i < elem->field->poly_deg; ++i)
+    {
+        result->poly[i] = (elem->field->mod - elem->poly[i]) % elem->field->mod;
+    }
+    return result;
+}
+
+FieldMember *ffSub(const FieldMember *left, const FieldMember *right)
+{
+    FieldMember *neg_right = ffNeg(right);
+    FieldMember *result = ffAdd(left, neg_right);
+    freeFieldMember(neg_right, 0);
+    return result;
+}
