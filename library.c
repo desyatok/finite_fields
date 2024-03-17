@@ -206,3 +206,15 @@ FieldMember *ffSub(const FieldMember *left, const FieldMember *right)
     freeFieldMember(neg_right, 0);
     return result;
 }
+
+FieldMember *fieldMemberCopy(FieldMember *elem)
+{
+    if (elem == NULL || elem->field == NULL) return NULL;
+    FieldMember *copy = getZero(elem->field);
+    copy->deg = elem->deg;
+    for (uint8_t i = 0; i <= copy->deg; ++i)
+    {
+        copy->poly[i] = elem->poly[i];
+    }
+    return copy;
+}

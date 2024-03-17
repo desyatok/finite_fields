@@ -25,6 +25,8 @@ FieldMember *getIdentity(Field *field);
 
 FieldMember *fieldMemberInit(Field *field, const uint8_t *poly, uint8_t poly_deg);
 
+FieldMember *fieldMemberCopy(FieldMember *elem);
+
 FieldMember *ffAdd(const FieldMember *left, const FieldMember *right);
 
 FieldMember *ffSub(const FieldMember *left, const FieldMember *right);
