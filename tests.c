@@ -158,6 +158,26 @@ MU_TEST(test_ffNeg_and_ffSub)
     freeFieldMember(res,1);
 }
 
+MU_TEST(test_ffMul)
+{
+    uint8_t irred_poly[] = {5,1,0,3,1,0,0,0,1};
+    field = getField(7,irred_poly,8);
+    uint8_t poly1[] = {7,4,6,5,5,3,1,1};
+    uint8_t poly2[] = {4,4,5,6,1,3};
+    FieldMember* mem1 = fieldMemberInit(field,poly1,7);
+    FieldMember* mem2 = fieldMemberInit(field,poly2,5);
+    FieldMember *mul = ffMul(mem1,mem2);
+
+    uint8_t res_poly[] = { 4,2,1,1,0,3,5};
+    FieldMember *res = fieldMemberInit(field,res_poly,6);
+    mu_check(fieldMembersAreEqual(mul,res));
+
+    freeFieldMember(mem1,0);
+    freeFieldMember(mem2,0);
+    freeFieldMember(mul,0);
+    freeFieldMember(res,1);
+}
+
 MU_TEST_SUITE(test_suite)
 {
     MU_SUITE_CONFIGURE(&test_setup, &test_teardown);
@@ -174,6 +194,7 @@ MU_TEST_SUITE(test_suite)
 
     MU_RUN_TEST(test_ffAdd);
     MU_RUN_TEST(test_ffNeg_and_ffSub);
+    MU_RUN_TEST(test_ffMul);
 }
 
 int main()

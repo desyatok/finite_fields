@@ -218,3 +218,71 @@ FieldMember *fieldMemberCopy(FieldMember *elem)
     }
     return copy;
 }
+
+FieldMember *takeMod(const uint8_t *left, uint8_t left_deg, Field *field)
+{
+    uint8_t *res_poly = (uint8_t *)malloc((left_deg + 1) * sizeof(uint8_t));
+    for (uint8_t i = 0; i <= left_deg; ++i)
+    {
+        res_poly[i] = left[i];
+    }
+    uint8_t res_deg = left_deg;
+
+    while (res_deg >= field->poly_deg)
+    {
+        uint8_t leading_coefficient = res_poly[res_deg] / field->irred_poly[field->poly_deg];
+        for (uint8_t i = 0; i <= field->poly_deg; ++i)
+        {
+            uint8_t neg_sub = (field->mod - (leading_coefficient * field->irred_poly[i]) % field->mod)
+                              % field->mod;
+            res_poly[res_deg - field->poly_deg + i] = (res_poly[res_deg - field->poly_deg + i] + neg_sub)
+                                                      % field->mod;
+        }
+        while (res_deg != UINT8_MAX && res_poly[res_deg] == 0)
+        {
+            res_deg--;
+        }
+    }
+    FieldMember *result = fieldMemberInit(field,res_poly,res_deg);
+    free(res_poly);
+    return result;
+}
+
+FieldMember *ffMul(const FieldMember *left, const FieldMember *right)
+{
+    if (left == NULL || right == NULL || !fieldsAreEqual(left->field, right->field)) return NULL;
+    if (right->deg == UINT8_MAX || left->deg == UINT8_MAX) return getZero(left->field);
+    uint8_t res_deg = left->deg + right->deg;
+    uint8_t *res_poly = (uint8_t *)malloc((res_deg + 1) * sizeof(uint8_t));
+    for (uint8_t i = 0; i <= res_deg; ++i)
+    {
+        res_poly[i] = 0;
+    }
+    uint8_t product, carry;
+
+    for (size_t i = 0; i <= left->deg; ++i)
+    {
+        carry = 0;
+        for (int j = 0; j <= right->deg; ++j)
+        {
+            product = (res_poly[i + j]
+                       + (i <= left->deg ?
+                          (left->poly[i] * right->poly[j]) % left->field->mod : 0)
+                       + carry) % left->field->mod;
+            res_poly[i + j] = product % 10;
+            carry = product / 10;
+        }
+        if (carry)
+        {
+            res_poly[i + right->deg] = carry;
+        }
+    }
+
+    for (uint8_t i = 0; i <= left->deg + right->deg; ++i)
+    {
+        if (res_poly[i] != 0) res_deg = i;
+    }
+    FieldMember *result = takeMod(res_poly, res_deg,left->field);
+    free(res_poly);
+    return result;
+}
