@@ -266,8 +266,7 @@ FieldMember *ffMul(const FieldMember *left, const FieldMember *right)
         for (int j = 0; j <= right->deg; ++j)
         {
             product = (res_poly[i + j]
-                       + (i <= left->deg ?
-                          (left->poly[i] * right->poly[j]) % left->field->mod : 0)
+                       + (i <= left->deg ? (left->poly[i] * right->poly[j]) % left->field->mod : 0)
                        + carry) % left->field->mod;
             res_poly[i + j] = product % 10;
             carry = product / 10;
@@ -284,5 +283,56 @@ FieldMember *ffMul(const FieldMember *left, const FieldMember *right)
     }
     FieldMember *result = takeMod(res_poly, res_deg,left->field);
     free(res_poly);
+    return result;
+}
+
+FieldMember *fastPow(FieldMember* elem, uint64_t power)
+{
+    if (elem == NULL || elem->field == NULL) return NULL;
+    FieldMember *result = getIdentity(elem->field);
+    FieldMember *base = fieldMemberCopy(elem);
+    while (power > 0)
+    {
+        if (power & 1)
+        {
+            FieldMember *tmp = result;
+            result = ffMul(result,base);
+            freeFieldMember(tmp,0);
+        }
+        FieldMember *tmp = base;
+        base = ffMul(base,base);
+        freeFieldMember(tmp,0);
+        power >>= 1;
+    }
+    freeFieldMember(base,0);
+    return result;
+}
+
+uint64_t fastPowIntegers(uint64_t base, uint8_t power)
+{
+    uint64_t result = 1;
+    while (power > 0)
+    {
+        if (power & 1)
+        {
+            result *= base;
+        }
+        base *= base;
+        power >>= 1;
+    }
+    return result;
+}
+
+FieldMember *ffInv(FieldMember *elem)
+{
+    uint64_t power = fastPowIntegers((uint64_t)elem->field->mod,elem->field->poly_deg) - 2;
+    return fastPow(elem,power);
+}
+
+FieldMember *ffDiv(const FieldMember *left, FieldMember *right)
+{
+    FieldMember *right_inv = ffInv(right);
+    FieldMember *result = ffMul(left,right_inv);
+    freeFieldMember(right_inv,0);
     return result;
 }

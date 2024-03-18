@@ -33,9 +33,9 @@ FieldMember *ffSub(const FieldMember *left, const FieldMember *right);
 
 FieldMember *ffMul(const FieldMember *left, const FieldMember *right);
 
-FieldMember *ffDiv(const FieldMember *left, const FieldMember *right);
+FieldMember *ffDiv(const FieldMember *left, FieldMember *right);
 
-FieldMember *ffInv(const FieldMember *elem); // обратное
+FieldMember *ffInv(FieldMember *elem); // обратное
 
 FieldMember *ffNeg(const FieldMember *elem); // противоположное
 
