@@ -23,15 +23,19 @@ FieldMember *getZero(Field *field);
 
 FieldMember *getIdentity(Field *field);
 
+FieldMember *fieldMemberInit(Field *field, const uint8_t *poly, uint8_t poly_deg);
+
+FieldMember *fieldMemberCopy(FieldMember *elem);
+
 FieldMember *ffAdd(const FieldMember *left, const FieldMember *right);
 
 FieldMember *ffSub(const FieldMember *left, const FieldMember *right);
 
 FieldMember *ffMul(const FieldMember *left, const FieldMember *right);
 
-FieldMember *ffDiv(const FieldMember *left, const FieldMember *right);
+FieldMember *ffDiv(const FieldMember *left, FieldMember *right);
 
-FieldMember *ffInv(const FieldMember *elem); // обратное
+FieldMember *ffInv(FieldMember *elem); // обратное
 
 FieldMember *ffNeg(const FieldMember *elem); // противоположное
 
@@ -48,6 +52,10 @@ uint16_t ff_to_uint16(const FieldMember *elem);
 uint32_t ff_to_uint32(const FieldMember *elem);
 
 void freeField(Field *field);
+
+_Bool fieldsAreEqual(const Field *left, const Field *right);
+
+_Bool fieldMembersAreEqual(const FieldMember *left, const FieldMember *right);
 
 void freeFieldMember(FieldMember *mem, _Bool delete_field);
 
