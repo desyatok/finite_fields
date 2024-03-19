@@ -2,6 +2,8 @@
 
 #include "library.h"
 
+#define max(a, b) (a) > (b) ? (a) : (b)
+
 Field *getField(uint8_t mod, const uint8_t *poly, uint8_t poly_deg)
 {
     Field *newField = (Field *)malloc(sizeof(Field));
@@ -179,7 +181,8 @@ FieldMember *ffAdd(const FieldMember *left, const FieldMember *right)
 {
     if (left == NULL || right == NULL || !fieldsAreEqual(left->field, right->field)) return NULL;
     FieldMember *result = getZero(left->field);
-    for (uint8_t i = 0; i < left->field->poly_deg; ++i)
+    uint8_t iterations = max(left->deg, right->deg);
+    for (uint8_t i = 0; i <= iterations; ++i)
     {
         result->poly[i] = (left->poly[i] + right->poly[i]) % left->field->mod;
         if (result->poly[i] != 0) result->deg = i;
@@ -191,7 +194,7 @@ FieldMember *ffNeg(const FieldMember *elem)
 {
     if (elem == NULL || elem->field == NULL) return NULL;
     FieldMember *result = getZero(elem->field);
-    for (uint8_t i = 0; i < elem->field->poly_deg; ++i)
+    for (uint8_t i = 0; i <= elem->deg; ++i)
     {
         result->poly[i] = (elem->field->mod - elem->poly[i]) % elem->field->mod;
         if (result->poly[i] != 0) result->deg = i;
