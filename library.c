@@ -1,5 +1,5 @@
 #include <stdlib.h>
-
+#include <string.h>
 #include "library.h"
 
 Field *getField(uint8_t mod, const uint8_t *poly, uint8_t poly_deg)
@@ -8,10 +8,7 @@ Field *getField(uint8_t mod, const uint8_t *poly, uint8_t poly_deg)
     newField->mod = mod;
     newField->poly_deg = poly_deg;
     newField->irred_poly = (uint8_t *)malloc((poly_deg + 1) * sizeof(uint8_t));
-    for (size_t i = 0; i <= poly_deg; ++i)
-    {
-        newField->irred_poly[i] = poly[i];
-    }
+    memcpy(newField->irred_poly, poly, poly_deg + 1);
     return newField;
 }
 
@@ -39,16 +36,16 @@ FieldMember *getZero(Field *field)
     FieldMember *zero = (FieldMember *)malloc(sizeof(FieldMember));
     zero->field = field;
     zero->poly = (uint8_t *)malloc(field->poly_deg * sizeof(uint8_t));
-    for (uint8_t i = 0; i < field->poly_deg; ++i) // memset
-    {
-        zero->poly[i] = 0;
-    }
+    memset(zero->poly, 0, field->poly_deg);
     return zero;
 }
 
 FieldMember *getIdentity(Field *field)
 {
-
+    if (field == NULL) return NULL;
+    FieldMember *identity = getZero(field);
+    identity->poly[0] = 1;
+    return identity;
 }
 
 uint8_t ff_to_uint8(const FieldMember *elem)
@@ -86,7 +83,7 @@ uint32_t ff_to_uint32(const FieldMember *elem)
 
 FieldMember *uint8_to_ff(uint8_t elem)
 {
-    uint8_t poly[] = {1,0,1,1,1,0,0,0,1};
+    static const uint8_t poly[] = {1,0,1,1,1,0,0,0,1};
     Field *field = getField(2,poly,8);
     FieldMember *mem = getZero(field);
     for (uint8_t i = 0; i < mem->field->poly_deg; ++i)
@@ -99,7 +96,7 @@ FieldMember *uint8_to_ff(uint8_t elem)
 
 FieldMember *uint16_to_ff(uint16_t elem)
 {
-    uint8_t poly[] = {1,1,0,1,0,0,0,0,
+    static const uint8_t poly[] = {1,1,0,1,0,0,0,0,
                        0,0,0,0,1,0,0,0, 1};
     Field *field = getField(2,poly,16);
     FieldMember *mem = getZero(field);
@@ -113,7 +110,7 @@ FieldMember *uint16_to_ff(uint16_t elem)
 
 FieldMember *uint32_to_ff(uint32_t elem)
 {
-    uint8_t poly[] = {1,1,1,0,0,0,0,0,
+    static const uint8_t poly[] = {1,1,1,0,0,0,0,0,
                       0,0,0,0,0,0,0,0,
                       0,0,0,0,0,0,1,0,
                       0,0,0,0,0,0,0,0,1};
@@ -131,7 +128,7 @@ FieldMember *fieldMemberInit(Field *field, const uint8_t *poly, uint8_t poly_deg
 {
     if (field == NULL || poly == NULL || field->poly_deg <= poly_deg) return NULL;
     FieldMember *member = getZero(field);
-    for (uint8_t i = 0; i < field->poly_deg; ++i) // memset ?
+    for (uint8_t i = 0; i < field->poly_deg; ++i)
     {
         member->poly[i] = i <= poly_deg ? poly[i] % field->mod : 0;
     }
@@ -193,20 +190,14 @@ FieldMember *fieldMemberCopy(FieldMember *elem)
 {
     if (elem == NULL || elem->field == NULL) return NULL;
     FieldMember *copy = getZero(elem->field);
-    for (uint8_t i = 0; i <= copy->field->poly_deg; ++i) // memcpy
-    {
-        copy->poly[i] = elem->poly[i];
-    }
+    memcpy(copy->poly,elem->poly,copy->field->poly_deg);
     return copy;
 }
 
 FieldMember *takeMod(const uint8_t *left, uint8_t left_deg, Field *field)
 {
     uint8_t *res_poly = (uint8_t *)malloc((left_deg + 1) * sizeof(uint8_t));
-    for (uint8_t i = 0; i <= left_deg; ++i) // memcpy
-    {
-        res_poly[i] = left[i];
-    }
+    memcpy(res_poly, left, left_deg + 1);
     uint8_t res_deg = left_deg;
 
     while (res_deg >= field->poly_deg)
