@@ -13,7 +13,6 @@ typedef struct
 typedef struct
 {
     Field *field;
-    uint8_t deg;
     uint8_t *poly;
 } FieldMember;
 
