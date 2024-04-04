@@ -5,9 +5,15 @@
 Field *getField(uint8_t mod, const uint8_t *poly, uint8_t poly_deg)
 {
     Field *newField = (Field *)malloc(sizeof(Field));
+    if (newField == NULL) return NULL;
     newField->mod = mod;
     newField->poly_deg = poly_deg;
     newField->irred_poly = (uint8_t *)malloc((poly_deg + 1) * sizeof(uint8_t));
+    if (newField->irred_poly == NULL)
+    {
+        free(newField);
+        return NULL;
+    }
     memcpy(newField->irred_poly, poly, poly_deg + 1);
     return newField;
 }
@@ -34,8 +40,14 @@ FieldMember *getZero(Field *field)
 {
     if (field == NULL) return NULL;
     FieldMember *zero = (FieldMember *)malloc(sizeof(FieldMember));
+    if (zero == NULL) return NULL;
     zero->field = field;
     zero->poly = (uint8_t *)malloc(field->poly_deg * sizeof(uint8_t));
+    if (zero->poly == NULL)
+    {
+        free(zero);
+        return NULL;
+    }
     memset(zero->poly, 0, field->poly_deg);
     return zero;
 }
@@ -197,6 +209,7 @@ FieldMember *fieldMemberCopy(FieldMember *elem)
 FieldMember *takeMod(const uint8_t *left, uint8_t left_deg, Field *field)
 {
     uint8_t *res_poly = (uint8_t *)malloc((left_deg + 1) * sizeof(uint8_t));
+    if (res_poly == NULL) return NULL;
     memcpy(res_poly, left, left_deg + 1);
     uint8_t res_deg = left_deg;
 
