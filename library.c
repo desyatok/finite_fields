@@ -25,7 +25,7 @@ void freeField(Field *field)
     free(field);
 }
 
-void freeFieldMember(FieldMember *mem, _Bool delete_field)
+void freeFieldMember(FieldMember *mem, bool delete_field)
 {
     if (mem == NULL) return;
     if (delete_field)
@@ -147,25 +147,25 @@ FieldMember *fieldMemberInit(Field *field, const uint8_t *poly, uint8_t poly_deg
     return member;
 }
 
-_Bool fieldsAreEqual(const Field *left, const Field *right)
+bool fieldsAreEqual(const Field *left, const Field *right)
 {
-    if (left == NULL || right == NULL || left->mod != right->mod || left->poly_deg != right->poly_deg) return 0;
+    if (left == NULL || right == NULL || left->mod != right->mod || left->poly_deg != right->poly_deg) return false;
     for (uint8_t i = 0; i <= left->poly_deg; ++i)
     {
-        if (left->irred_poly[i] != right->irred_poly[i]) return 0;
+        if (left->irred_poly[i] != right->irred_poly[i]) return false;
     }
-    return 1;
+    return true;
 }
 
-_Bool fieldMembersAreEqual(const FieldMember *left, const FieldMember *right)
+bool fieldMembersAreEqual(const FieldMember *left, const FieldMember *right)
 {
     if (left == NULL || right == NULL
-        || !fieldsAreEqual(left->field, right->field)) return 0;
+        || !fieldsAreEqual(left->field, right->field)) return false;
     for (uint8_t i = 0; i < left->field->poly_deg; ++i)
     {
-        if (left->poly[i] != right->poly[i]) return 0;
+        if (left->poly[i] != right->poly[i]) return false;
     }
-    return 1;
+    return true;
 }
 
 FieldMember *ffAdd(const FieldMember *left, const FieldMember *right)
@@ -206,12 +206,20 @@ FieldMember *fieldMemberCopy(FieldMember *elem)
     return copy;
 }
 
-FieldMember *takeMod(const uint8_t *left, uint8_t left_deg, Field *field)
+static inline void calcRealDeg(const uint8_t *poly, uint8_t *poly_deg)
 {
-    uint8_t *res_poly = (uint8_t *)malloc((left_deg + 1) * sizeof(uint8_t));
+    while (*poly_deg != UINT8_MAX && poly[*poly_deg] == 0)
+    {
+        (*poly_deg)--;
+    }
+}
+
+static FieldMember *takeMod(const uint8_t *poly, uint8_t poly_deg, Field *field)
+{
+    uint8_t *res_poly = (uint8_t *)malloc((poly_deg + 1) * sizeof(uint8_t));
     if (res_poly == NULL) return NULL;
-    memcpy(res_poly, left, left_deg + 1);
-    uint8_t res_deg = left_deg;
+    memcpy(res_poly, poly, poly_deg + 1);
+    uint8_t res_deg = poly_deg;
 
     while (res_deg >= field->poly_deg)
     {
@@ -223,10 +231,7 @@ FieldMember *takeMod(const uint8_t *left, uint8_t left_deg, Field *field)
             res_poly[res_deg - field->poly_deg + i] = (res_poly[res_deg - field->poly_deg + i] + neg_sub)
                                                       % field->mod;
         }
-        while (res_deg != UINT8_MAX && res_poly[res_deg] == 0)
-        {
-            res_deg--;
-        }
+        calcRealDeg(res_poly, &res_deg);
     }
     FieldMember *result = fieldMemberInit(field,res_poly,res_deg);
     free(res_poly);
@@ -235,7 +240,21 @@ FieldMember *takeMod(const uint8_t *left, uint8_t left_deg, Field *field)
 
 FieldMember *ffMul(const FieldMember *left, const FieldMember *right)
 {
+    if (left == NULL || right == NULL || !fieldsAreEqual(left->field, right->field)) return NULL;
 
+    uint8_t res_deg = left->field->poly_deg * 2 - 2;
+    uint8_t *res_poly = (uint8_t *)malloc((res_deg + 1) * sizeof(uint8_t));
+    memset(res_poly,0,(res_deg + 1));
+    for (size_t i = 0; i < left->field->poly_deg; ++i)
+    {
+        for (size_t j = 0; j < right->field->poly_deg; ++j)
+        {
+            res_poly[i + j] = (res_poly[i + j] + (left->poly[i] * right->poly[j]) % left->field->mod) % left->field->mod;
+        }
+    }
+    FieldMember *result = takeMod(res_poly, res_deg, left->field);
+    free(res_poly);
+    return result;
 }
 
 FieldMember *fastPow(FieldMember* elem, uint64_t power)

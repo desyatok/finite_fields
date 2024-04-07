@@ -2,6 +2,7 @@
 #define FINITE_FIELDS_LIBRARY_H
 
 #include <inttypes.h>
+#include <stdbool.h>
 
 typedef struct
 {
@@ -52,10 +53,10 @@ uint32_t ff_to_uint32(const FieldMember *elem);
 
 void freeField(Field *field);
 
-_Bool fieldsAreEqual(const Field *left, const Field *right);
+bool fieldsAreEqual(const Field *left, const Field *right);
 
-_Bool fieldMembersAreEqual(const FieldMember *left, const FieldMember *right);
+bool fieldMembersAreEqual(const FieldMember *left, const FieldMember *right);
 
-void freeFieldMember(FieldMember *mem, _Bool delete_field);
+void freeFieldMember(FieldMember *mem, bool delete_field);
 
 #endif //FINITE_FIELDS_LIBRARY_H
